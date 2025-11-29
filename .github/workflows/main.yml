@@ -25,6 +25,7 @@ jobs:
     - name: Run mlflow project
       shell: bash
       run: |
+        conda init
         conda activate mlflow-env
         mlflow run MLProject --env-manager=local
 
