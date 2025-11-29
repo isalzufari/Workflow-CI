@@ -1,0 +1,62 @@
+name: MLflow CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Conda Environment
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        activate-environment: mlflow-env
+        environment-file: MLProject/conda.yaml
+        auto-activate-base: false
+        use-mamba: true
+
+    - name: Run mlflow project
+      shell: bash
+      run: |
+        conda activate mlflow-env
+        mlflow run MLProject --env-manager=local
+
+    - name: Get latest MLflow run_id
+      shell: bash
+      run: |
+        RUN_ID=$(ls -td mlruns/0/*/ | grep -Eo '[0-9a-f]{32}' | head -n 1)
+        echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+        echo "Latest run_id: $RUN_ID"
+
+    - name: Commit & Push results
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add mlruns/
+        git commit -m "Upload artifact [skip ci]" || echo "No changes to commit"
+        git push origin main
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Build and Tag Docker Image
+      shell: bash
+      run: |
+        mlflow models build-docker --model-uri "runs:/${{ env.RUN_ID }}/model" \
+                                   --name "${{ secrets.DOCKER_HUB_USERNAME }}/placement_model"
+        
+        docker tag ${{ secrets.DOCKER_HUB_USERNAME }}/placement_model:latest ${{ secrets.DOCKER_HUB_USERNAME }}/placement_model:latest
+
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/placement_model:latest
