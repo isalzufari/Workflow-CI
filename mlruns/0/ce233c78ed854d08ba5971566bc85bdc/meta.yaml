@@ -1,0 +1,14 @@
+artifact_uri: file:///home/runner/work/Workflow-CI/Workflow-CI/mlruns/0/ce233c78ed854d08ba5971566bc85bdc/artifacts
+end_time: 1764454441627
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: ce233c78ed854d08ba5971566bc85bdc
+run_name: persistent-skink-171
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764454438258
+status: 3
+tags: []
+user_id: runner
