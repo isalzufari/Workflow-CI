@@ -1,5 +1,7 @@
 name: Placement-CI-Workflow
 
+conda_env: conda.yaml
+
 entry_points:
   main:
     command: "python modelling.py --n_estimators {n_estimators} --max_depth {max_depth}"
