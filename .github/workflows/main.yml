@@ -24,12 +24,10 @@ jobs:
         auto-update_conda: true
 
     - name: Run mlflow project
-      shell: bash -l {0}
       run: |
         mlflow run MLProject --env-manager=local
 
     - name: Get latest MLflow run_id
-      shell: bash -l {0}
       id: get_run_id
       run: |
         RUN_ID=$(ls -td mlruns/0/*/ | grep -Eo '[0-9a-f]{32}' | head -n 1)
@@ -51,7 +49,6 @@ jobs:
         password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
     - name: Build and Tag Docker Image
-      shell: bash
       run: |
         mlflow models build-docker --model-uri "runs:/${{ env.RUN_ID }}/model" \
                                    --name "${{ secrets.DOCKER_HUB_USERNAME }}/placement_model"
