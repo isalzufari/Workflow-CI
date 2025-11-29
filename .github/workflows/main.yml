@@ -21,14 +21,16 @@ jobs:
         environment-file: MLProject/conda.yaml
         auto-activate-base: false
         use-mamba: true
+        auto-update_conda: true
 
     - name: Run mlflow project
-      shell: bash
+      shell: bash -l {0}
       run: |
         mlflow run MLProject --env-manager=local
 
     - name: Get latest MLflow run_id
-      shell: bash
+      shell: bash -l {0}
+      id: get_run_id
       run: |
         RUN_ID=$(ls -td mlruns/0/*/ | grep -Eo '[0-9a-f]{32}' | head -n 1)
         echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
